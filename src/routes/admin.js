@@ -72,15 +72,28 @@ adminRouter.delete('/deleteTask/:id',adminAuth,async(req,res)=>{
     }
 });
 
-adminRouter.get('/getTask',adminAuth,async(req,res)=>{
+adminRouter.get('/getAllTask',adminAuth,async(req,res)=>{
     try{
-        
-        const task=await Task.find();
+        let { page, limit } = req.query;
+
+        page = parseInt(page) || 1; 
+        limit = parseInt(limit) || 5;
+
+        const skip = (page - 1) * limit;
+
+        const totalTasks = await Task.countDocuments();
+
+
+        const task=await Task.find().skip(skip).limit(limit).sort({ createdAt: -1 });;
          if(!task || tasks.length === 0){
         return res.status(404).json({success:false,message:"no task found "})
        }
        
-       res.status(200).json({success:true,data:task})
+       res.status(200).json({success:true,
+            currentPage: page,
+            totalPages: Math.ceil(totalTasks / limit),
+            totalTasks,
+            data:task})
     }catch(err){
         res.status(500).send("ERROR"+err.message)
     }

@@ -67,7 +67,7 @@ userRouter.post('/login',async(req,res)=>{
 })
 
 
-userRouter.get("/getSpecificTask",userAuth,async(req,res)=>{
+userRouter.get("/getTask",userAuth,async(req,res)=>{
     try{
 
         const user=req.user
@@ -80,5 +80,37 @@ userRouter.get("/getSpecificTask",userAuth,async(req,res)=>{
         res.status(500).send("ERROR"+err.message)
     }
 })
+
+userRouter.get("/getOneTask/:id",async(req,res)=>{
+    try{
+        const {id}=req.params
+        const user=req.user
+        const task=await Task.findById(id)
+        if(!task){
+            return res.status(404).json({success:false,message:"no task found"})
+        }
+        res.status(200).json({success:true,data:task})
+    }catch(err){
+        res.status(500).send("ERROR"+err.message)
+    }
+})
+
+userRouter.patch("/updateTaskStatus/:id", userAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const task = await Task.findById(id);
+        if (!task) return res.status(404).json({ success: false, message: "Task not found" });
+
+        task.status = status; 
+        const updatedTask = await task.save();
+
+        res.status(200).json({ success: true, data: updatedTask });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 
 module.exports=userRouter;
