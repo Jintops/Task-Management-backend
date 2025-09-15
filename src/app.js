@@ -2,11 +2,13 @@ const express=require('express')
 const connectDB=require('./config/database');
 const userRouter = require('./routes/user');
 const cookieParser = require('cookie-parser');
+const adminRouter = require('./routes/admin');
 const app=express();
 
 app.use(express.json())
 app.use(cookieParser())
 app.use('/',userRouter)
+app.use('/',adminRouter)
 
 connectDB().then(()=>{
     console.log("Database connected success")

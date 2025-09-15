@@ -2,6 +2,8 @@ const express=require('express')
 const User = require('../model/user')
 const bcrypt=require('bcryptjs')
 const jwt=require('jsonwebtoken')
+const { userAuth } = require('../middleware/auth')
+const Task = require('../model/task')
 const userRouter=express.Router()
 
 userRouter.post("/signup",async(req,res)=>{
@@ -64,5 +66,19 @@ userRouter.post('/login',async(req,res)=>{
     }
 })
 
+
+userRouter.get("/getSpecificTask",userAuth,async(req,res)=>{
+    try{
+
+        const user=req.user
+        const task=await Task.find({assignedTo:user._id})
+        if(!task || task.length===0){
+            return res.status(404).json({success:false,message:"no task assigned to you"})
+        }
+        res.status(200).json({success:true,data:task})
+    }catch(err){
+        res.status(500).send("ERROR"+err.message)
+    }
+})
 
 module.exports=userRouter;
