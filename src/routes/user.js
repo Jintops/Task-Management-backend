@@ -1,6 +1,7 @@
 const express=require('express')
 const User = require('../model/user')
-
+const bcrypt=require('bcryptjs')
+const jwt=require('jsonwebtoken')
 const userRouter=express.Router()
 
 userRouter.post("/signup",async(req,res)=>{
@@ -18,7 +19,7 @@ userRouter.post("/signup",async(req,res)=>{
             name,
             emailId,
             password:hashPassword,
-            role
+        
         })
        const savedUser=await newUser.save();
 
@@ -29,9 +30,35 @@ userRouter.post("/signup",async(req,res)=>{
         secure:false,
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     })
-    
+
        res.status(200).json({success:true,data:savedUser})
 
+    }catch(err){
+        res.status(500).send("ERROR"+err.message)
+    }
+})
+
+userRouter.post('/login',async(req,res)=>{
+    try{
+    const {emailId,password}=req.body
+
+    const user=await User.findOne({emailId})
+    if(!user){
+        return res.status(404).json({success:false,message:"not found"})
+    }
+    const pass=await bcrypt.compare(password,user.password)
+    if(!pass){
+        return res.status(404).json({success:false,message:"password not correct"})
+    }
+
+    const token=await jwt.sign({_id:user._id},"JINTASK",{expiresIn:"7d"})
+    res.cookie("token",token,{
+        httpOnly:true,
+        secure:false,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    })
+
+    res.status(200).json({success:true,data:user})
     }catch(err){
         res.status(500).send("ERROR"+err.message)
     }
