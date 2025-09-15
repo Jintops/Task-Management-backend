@@ -1,6 +1,10 @@
 const express=require('express')
-const connectDB=require('./config/database')
+const connectDB=require('./config/database');
+const userRouter = require('./routes/user');
 const app=express();
+
+
+app.use('/',userRouter)
 
 connectDB().then(()=>{
     console.log("Database connected success")
