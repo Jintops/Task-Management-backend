@@ -1,4 +1,4 @@
 
-const adminAuth=async(req,res,next)=>{
+const userAuth=async(req,res,next)=>{
     
 }
