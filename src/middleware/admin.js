@@ -10,7 +10,7 @@ const adminAuth = async (req, res, next) => {
       .json({ success: false, message: "unauthorised admin!" });
   }
   try {
-    const decodedData = await jwt.verify(token, JINTASK);
+    const decodedData = await jwt.verify(token, "JINTASK");
     const { _id } = decodedData;
     const user = await User.findById(_id);
     if (!user || user.role !== "admin") {

@@ -84,7 +84,7 @@ userRouter.get("/getOneTask/:id",async(req,res)=>{
     try{
         const {id}=req.params
         const user=req.user
-        const task=await Task.findById(id)
+        const task=await Task.findById(id).populate("assignedTo", "name emailId")
         if(!task){
             return res.status(404).json({success:false,message:"no task found"})
         }
