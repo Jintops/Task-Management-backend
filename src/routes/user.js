@@ -54,7 +54,7 @@ userRouter.post('/login',async(req,res)=>{
     }
 
     const token=await jwt.sign({_id:user._id},"JINTASK",{expiresIn:"7d"})
-    res.cookie("token",token,{
+     res.cookie("token",token,{
         httpOnly:true,
         secure:false,
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -69,7 +69,6 @@ userRouter.post('/login',async(req,res)=>{
 
 userRouter.get("/getTask",userAuth,async(req,res)=>{
     try{
-
         const user=req.user
         const task=await Task.find({assignedTo:user._id})
         if(!task || task.length===0){
@@ -95,7 +94,7 @@ userRouter.get("/getOneTask/:id",async(req,res)=>{
     }
 })
 
-userRouter.patch("/updateTaskStatus/:id", userAuth, async (req, res) => {
+userRouter.patch("/updateTaskStatus/:id",userAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;

@@ -3,14 +3,14 @@ const User = require("../model/user");
 
 const userAuth=async(req,res,next)=>{
     const { token } = req.cookies;
-  if (!token) {
+   if (!token) {
     return res.status(401).json({
       success: false,
       message: "unauthorised user!",
     });
   }
   try {
-    const decodedData = await jwt.verify(token,JINTASK);
+    const decodedData = await jwt.verify(token,"JINTASK");
     const { _id } = decodedData;
     const user = await User.findById(_id);
     if (!user || user.role !== "user") {

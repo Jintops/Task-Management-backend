@@ -3,12 +3,23 @@ const connectDB=require('./config/database');
 const userRouter = require('./routes/user');
 const cookieParser = require('cookie-parser');
 const adminRouter = require('./routes/admin');
+const cors=require('cors')
 const app=express();
+
+
+app.use(
+  cors({
+    origin: "http://localhost:5174",
+    credentials: true,
+  })
+);
 
 app.use(express.json())
 app.use(cookieParser())
 app.use('/',userRouter)
 app.use('/',adminRouter)
+
+
 
 connectDB().then(()=>{
     console.log("Database connected success")

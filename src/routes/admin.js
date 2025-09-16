@@ -4,11 +4,11 @@ const Task = require('../model/task');
 const User = require('../model/user');
 const adminRouter=express.Router();
 
-adminRouter.post('/taskCreate',adminAuth,async(req,res)=>{
+adminRouter.post('/taskCreate',async(req,res)=>{
     try{
        const {title,description,dueDate,status,priority,assignedTo}=req.body
        
-       const user=await User.findById(adminRouter)
+       const user=await User.findById(assignedTo)
        if(!user){
         return res.status(404).json({success:false,message:"no user"})
        }
@@ -29,10 +29,10 @@ adminRouter.post('/taskCreate',adminAuth,async(req,res)=>{
     }
 })
 
-adminRouter.get('/getAllUser',adminAuth,async(req,res)=>{
+adminRouter.get('/getAllUser',async(req,res)=>{
     try{
         
-        const users=await User.find();
+        const users=await User.find({role:"user"});
          if(!users || users.length === 0){
         return res.status(404).json({success:false,message:"no users found"})
        }
@@ -43,14 +43,14 @@ adminRouter.get('/getAllUser',adminAuth,async(req,res)=>{
     }
 })
 
-adminRouter.delete('/removeUser/:id',adminAuth,async(req,res)=>{
+adminRouter.delete('/removeUser/:id',async(req,res)=>{
     try{
         const {id}=req.params;
         const user=await User.findByIdAndDelete(id);
          if(!user){
         return res.status(404).json({success:false,message:"no user found"})
        }
-       
+       await Task.deleteMany({assignedTo:id})
        res.status(200).json({success:true,data:user})
     }catch(err){
         res.status(500).send("ERROR"+err.message)
@@ -58,7 +58,7 @@ adminRouter.delete('/removeUser/:id',adminAuth,async(req,res)=>{
 });
 
 
-adminRouter.delete('/deleteTask/:id',adminAuth,async(req,res)=>{
+adminRouter.delete('/deleteTask/:id',async(req,res)=>{
     try{
         const {id}=req.params;
         const task=await Task.findByIdAndDelete(id);
@@ -72,7 +72,7 @@ adminRouter.delete('/deleteTask/:id',adminAuth,async(req,res)=>{
     }
 });
 
-adminRouter.get('/getAllTask',adminAuth,async(req,res)=>{
+adminRouter.get('/getAllTask',async(req,res)=>{
     try{
         let { page, limit } = req.query;
 
@@ -85,7 +85,7 @@ adminRouter.get('/getAllTask',adminAuth,async(req,res)=>{
 
 
         const task=await Task.find().skip(skip).limit(limit).sort({ createdAt: -1 });;
-         if(!task || tasks.length === 0){
+         if(!task || task.length === 0){
         return res.status(404).json({success:false,message:"no task found "})
        }
        
@@ -99,10 +99,10 @@ adminRouter.get('/getAllTask',adminAuth,async(req,res)=>{
     }
 });
 
-adminRouter.put('/editTask/:id', adminAuth, async (req, res) => {
+adminRouter.put('/editTask/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, dueDate, status, priority, assignedTo } = req.body;
+        const { title, description, dueDate, status, priority } = req.body;
 
        
         const task = await Task.findById(id);
@@ -110,10 +110,10 @@ adminRouter.put('/editTask/:id', adminAuth, async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found" });
         }
      
-            const user = await User.findById(assignedTo);
-            if (!user) {
-                return res.status(404).json({ success: false, message: "Assigned user not found" });
-            }
+            // const user = await User.findById(assignedTo);
+            // if (!user) {
+            //     return res.status(404).json({ success: false, message: "Assigned user not found" });
+            // }
 
 
         if (title) task.title = title;
