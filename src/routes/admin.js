@@ -103,35 +103,87 @@ const task = await Task.find()
     }
 });
 
-adminRouter.put('/editTask/:id',adminAuth, async (req, res) => {
+adminRouter.put('/updateTaskStatus/:id',adminAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, dueDate, status, priority } = req.body;
+        const { status } = req.body;
 
-       
+        const validStatuses = ["pending", "inprogress", "completed"];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid status value" });
+        }
+
         const task = await Task.findById(id);
         if (!task) {
             return res.status(404).json({ success: false, message: "Task not found" });
         }
-     
 
-        if (title) task.title = title;
-        if (description) task.description = description;
-        if (dueDate) task.dueDate = dueDate;
-        if (status) task.status = status;
-        if (priority) task.priority = priority;
-
+        task.status = status;
         const updatedTask = await task.save();
 
         res.status(200).json({ success: true, data: updatedTask });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
+}); 
+
+adminRouter.put('/reassignTask/:id',adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { assignedTo } = req.body;
+
+        const user = await User.findById(assignedTo);                                   
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const task = await Task.findById(id);       
+        if (!task) {
+            return res.status(404).json({ success: false, message: "Task not found" });
+        }
+        
+        task.assignedTo = user;
+        const updatedTask = await task.save();
+        res.status(200).json({ success: true, data: updatedTask });
+    }
+    catch (err) {           
+        res.status(500).json({ success: false, message: err.message }); 
+    }   
+
 });
 
 
 
 
+// adminRouter.put('/editTask/:id',adminAuth, async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { title, description, dueDate, status, priority } = req.body;
+
+       
+//         const task = await Task.findById(id);
+//         if (!task) {
+//             return res.status(404).json({ success: false, message: "Task not found" });
+//         }
+     
+
+//         if (title) task.title = title;
+//         if (description) task.description = description;
+//         if (dueDate) task.dueDate = dueDate;
+//         if (status) task.status = status;
+//         if (priority) task.priority = priority;
+
+//         const updatedTask = await task.save();
+
+//         res.status(200).json({ success: true, data: updatedTask });
+//     } catch (err) {
+//         res.status(500).json({ success: false, message: err.message });
+//     }
+// });
 
 
-module.exports=adminRouter
+
+
+
+
+module.exports=adminRouter;
